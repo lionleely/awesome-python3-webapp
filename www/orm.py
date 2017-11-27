@@ -39,14 +39,15 @@ async def create_pool(loop,**kw):
 async def select(sql,args,size=None):
     log(sql,args)
     global __pool
-    async with conn.cursor(aiomysql.DictCursor) as cur:
-        await cur.execute(sql.replace('?','%s'),args or ())
-        if size:
-            rs = await cur.fetchmany(size)
-        else:
-            rs = await cur.fetchall()
-        logging.info('row returned: %s' % len(rs))
-        return rs
+    async with __pool.get() as conn:
+        async with conn.cursor(aiomysql.DictCursor) as cur:
+            await cur.execute(sql.replace('?','%s'),args or ())
+            if size:
+                rs = await cur.fetchmany(size)
+            else:
+                rs = await cur.fetchall()
+            logging.info('row returned: %s' % len(rs))
+            return rs
 async def execute(sql,args,autocommit=True):
     log(sql)
     async with __pool.get() as conn:
@@ -222,5 +223,5 @@ class Model(dict,metaclass=ModelMetaclass):
     async def remove(self):
         args = [self.getValue(self.__primary_key__)]
         rows = await execute(self.__delete__,args)
-        if rows !=1:
-            logging.warn('failed to remove by primary key:affected rowd:%s' % rows)
+        if rows != 1:
+            logging.warn('failed to remove by primary key: affected rows: %s' % rows)
