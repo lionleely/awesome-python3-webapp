@@ -198,6 +198,8 @@ class Model(dict, metaclass=ModelMetaclass):
         if where:
             sql.append('where')
             sql.append(where)
+            # sql.append('=')
+            # sql.append(kw.get('name',None))
         if args is None:
             args = []
         orderBy = kw.get('orderBy', None)
@@ -215,6 +217,8 @@ class Model(dict, metaclass=ModelMetaclass):
                 args.extend(limit)
             else:
                 raise ValueError('Invalid limit value: %s' % str(limit))
+        print(sql)
+        print(' '.join(sql))
         rs = await select(' '.join(sql), args)
         return [cls(**r) for r in rs]
 
