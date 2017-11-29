@@ -17,7 +17,7 @@ from www.apis import APIError
 
 
 
-from aiohttp import web, asyncio
+from aiohttp import web
 
 
 def Handler_decorator(path, *, method):
